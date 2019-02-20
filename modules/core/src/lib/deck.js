@@ -211,6 +211,10 @@ export default class Deck {
       this.layerManager.setProps(newProps);
     }
 
+    if (this.effectManager) {
+      this.effectManager.setProps(newProps);
+    }
+
     // Update animation loop
     if (this.animationLoop) {
       this.animationLoop.setProps(newProps);
@@ -243,9 +247,15 @@ export default class Deck {
 
     const viewManagerNeedsRedraw = this.viewManager.needsRedraw({clearRedrawFlags});
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw({clearRedrawFlags});
+    const effectManagerNeedsRedraw = this.effectManager.needsRedraw({clearRedrawFlags});
     const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw({clearRedrawFlags});
 
-    redraw = redraw || viewManagerNeedsRedraw || layerManagerNeedsRedraw || deckRendererNeedsRedraw;
+    redraw =
+      redraw ||
+      viewManagerNeedsRedraw ||
+      layerManagerNeedsRedraw ||
+      effectManagerNeedsRedraw ||
+      deckRendererNeedsRedraw;
     return redraw;
   }
 
@@ -516,12 +526,9 @@ export default class Deck {
 
     this.effectManager = new EffectManager();
 
-    this.deckRenderer = new DeckRenderer(gl, {
-      layerManager: this.layerManager,
-      effectManager: this.effectManager
-    });
+    this.deckRenderer = new DeckRenderer(gl);
 
-    this.deckPicker = new DeckPicker(gl, {layerManager: this.layerManager});
+    this.deckPicker = new DeckPicker(gl);
 
     this.setProps(this.props);
 
@@ -547,7 +554,7 @@ export default class Deck {
       pass: 'screen',
       redrawReason,
       customRender: Boolean(this.props._customRender),
-      effects: this.props.effects
+      effects: this.effectManager.getEffects()
     });
 
     this.props.onAfterRender({gl});
