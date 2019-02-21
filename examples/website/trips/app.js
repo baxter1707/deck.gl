@@ -76,7 +76,7 @@ export class App extends Component {
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
-        strokeWidth: 2,
+        getWidth: 20,
         trailLength,
         currentTime: this.state.time
       }),
