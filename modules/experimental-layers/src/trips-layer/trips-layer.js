@@ -18,69 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PathLayer} from '@deck.gl/layers';
+import DynamicPathLayer from './dynamic-trips-layer';
 import {CompositeLayer} from '@deck.gl/core';
-
-const uniformToInject = 'uniform float trailLength;\n' + 'uniform float currentTime;';
-
-const varyingToInject =
-  'varying float vTime;\n' + 'varying float completion;\n' + 'varying float xPosition;';
-
-const fragmentShaderToInject =
-  'if(vTime > 1.0 || vTime < 0.0) {\n' +
-  '    discard;\n' +
-  '}\n' +
-  '  \n' +
-  'if(xPosition > completion){\n' +
-  '    discard;' +
-  '}';
-
-const vertexShaderToInject =
-  'vec4 shift = vec4(0., 0., mod(instanceEndPositions.z, trailLength) * 1e-4, 0.);\n' +
-  'gl_Position = project_to_clipspace(vec4(pos.xy, 1.0, 1.0))  + shift;\n' +
-  'vTime = 1.0 - (currentTime - instanceStartPositions.z) / trailLength;\n' +
-  'completion = clamp((currentTime - instanceStartPositions.z) / (instanceEndPositions.z - instanceStartPositions.z), 0.0, 1.0);\n' +
-  'xPosition = positions.x;';
-
-class DynamicPathLayer extends PathLayer {
-  getShaders() {
-    const shaders = super.getShaders();
-    shaders.inject = {
-      'vs:#decl': `${uniformToInject}\n${varyingToInject}`,
-      'vs:#main-end': vertexShaderToInject,
-      'fs:#decl': varyingToInject,
-      'fs:#main-start': fragmentShaderToInject,
-      'gl_FragColor = vColor;': 'gl_FragColor = vec4(gl_FragColor.rgb, gl_FragColor.a * vTime);'
-    };
-    return shaders;
-  }
-
-  draw({uniforms}) {
-    const {
-      rounded,
-      miterLimit,
-      widthScale,
-      widthMinPixels,
-      widthMaxPixels,
-      dashJustified,
-      trailLength,
-      currentTime
-    } = this.props;
-
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        jointType: Number(rounded),
-        alignMode: Number(dashJustified),
-        widthScale,
-        miterLimit,
-        widthMinPixels,
-        widthMaxPixels,
-        trailLength,
-        currentTime
-      })
-    );
-  }
-}
 
 const defaultProps = {
   trailLength: {type: 'number', value: 120, min: 0},
