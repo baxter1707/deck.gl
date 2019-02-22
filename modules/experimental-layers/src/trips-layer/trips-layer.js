@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import DynamicPathLayer from './dynamic-trips-layer';
+import DynamicPathLayer from './dynamic-path-layer';
 import {CompositeLayer} from '@deck.gl/core';
 
 const defaultProps = {
