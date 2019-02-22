@@ -38,7 +38,8 @@ export default class TripsLayer extends CompositeLayer {
         currentTime,
         getPath,
         getColor,
-        getWidth: strokeWidth
+        getWidth: 0,
+        widthMinPixels: strokeWidth
       })
     ];
   }
