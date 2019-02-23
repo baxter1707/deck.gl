@@ -26,8 +26,15 @@ uniform float currentTime;
 `;
 
 const varyingToInject = `\
+// vTime indicates when to start drawing the line segment as well as the fading effect
 varying float vTime;
+
+// completion indicates the portion of line segment to be drawn at current time
 varying float completion;
+
+// xPosition is the position of the line segment along x direction
+// it should be rendered if xPosition < completion
+// this can generate the effect that the path moves forward progressively
 varying float xPosition;
 `;
 
@@ -43,7 +50,7 @@ if(xPosition > completion){
 
 const vertexShaderToInject = `\
 vec4 shift = vec4(0., 0., mod(instanceEndPositions.z, trailLength) * 1e-4, 0.);
-gl_Position = project_to_clipspace(vec4(pos.xy, 1.0, 1.0)) + shift;
+gl_Position = gl_Position + shift;
 vTime = 1.0 - (currentTime - instanceStartPositions.z) / trailLength;
 completion = clamp((currentTime - instanceStartPositions.z) / (instanceEndPositions.z - instanceStartPositions.z), 0.0, 1.0);
 xPosition = positions.x;
@@ -57,7 +64,8 @@ export default class DynamicPathLayer extends PathLayer {
       'vs:#main-end': vertexShaderToInject,
       'fs:#decl': varyingToInject,
       'fs:#main-start': fragmentShaderToInject,
-      'gl_FragColor = vColor;': 'gl_FragColor = vec4(gl_FragColor.rgb, gl_FragColor.a * vTime);'
+      'gl_FragColor = vColor;': 'gl_FragColor = vec4(gl_FragColor.rgb, gl_FragColor.a * vTime);',
+      'vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);': 'pos = vec3(pos.xy, 1.0);'
     };
     return shaders;
   }
